@@ -64,5 +64,5 @@ fetch_terraform_config_inspect () {
 }
 
 download_release "${github_url}" "kvz/json2hcl" "v0.0.6" "json2hcl" # for tf 0.11
-download_release "${github_url}" "userhas404d/hcl2json" "v0.1.3" "hcl2json" # for terragurnt
+download_release "${github_url}" "tmccombs/hcl2json" "0.2.1" "hcl2json" # for terragurnt
 fetch_terraform_config_inspect "${github_url}"  "0.1.0"  "${archive_format}" # for tf 0.12
