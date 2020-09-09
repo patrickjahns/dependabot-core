@@ -13,7 +13,56 @@ if [ ! -d "$install_dir/bin" ]; then
 fi
 
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
-github_url="https://github.com/kvz/json2hcl"
-url="${github_url}/releases/download/v0.0.6/json2hcl_v0.0.6_${os}_amd64"
-wget -O "$install_dir/bin/json2hcl" "$url"
-chmod +x "$install_dir/bin/json2hcl"
+processor=$(uname -m)
+
+
+case "${processor}" in
+  x86_64      )   processor=amd64;;
+  arm*        )   processor=arm;;
+  *           )   processor=386;;
+esac
+
+archive_format=".tar.gz"
+case "${os}" in
+  windows     )   archive_format=".zip";;
+  *           )   archive_format=".tar.gz";;
+esac
+
+github_url="https://github.com"
+
+download_release () {
+  github_url=$1
+  repo=$2
+  release=$3
+  binary_name=$4
+
+  url="${github_url}/${repo}/releases/download/${release}/${binary_name}_${release}_${os}_${processor}"
+  wget -O "$install_dir/bin/${binary_name}" "$url"
+  chmod +x "$install_dir/bin/${binary_name}"
+}
+
+fetch_terraform_config_inspect () {
+  github_url=$1
+  release=$2
+  format=$3
+  repo="patrickjahns/terraform-config-inspect"
+  binary_name="terraform-config-inspect"
+
+
+  url="${github_url}/${repo}/releases/download/${release}/${binary_name}-${release}-${os}-${processor}${format}"
+  pushd "$install_dir/bin/" > /dev/null
+    wget -O "${binary_name}${format}" "$url"
+    if [[ "${format}" == ".tar.gz" ]]; then
+      tar xfz "${binary_name}${format}"
+    fi
+    if [[ "${format}" == ".zip" ]]; then
+      unzip "${binary_name}${format}"
+    fi
+    chmod +x "${binary_name}"
+    rm "${binary_name}${format}"
+  popd
+}
+
+download_release "${github_url}" "kvz/json2hcl" "v0.0.6" "json2hcl" # for tf 0.11
+download_release "${github_url}" "tmccombs/hcl2json" "0.2.1" "hcl2json" # for terragurnt
+fetch_terraform_config_inspect "${github_url}"  "0.1.0"  "${archive_format}" # for tf 0.12
